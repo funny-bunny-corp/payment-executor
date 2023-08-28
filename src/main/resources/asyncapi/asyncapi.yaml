@@ -1,0 +1,95 @@
+asyncapi: 2.6.0
+id: 'urn:com.paymentic.payments'
+info:
+  title: Payments Executor API CloudEvents API structured
+  version: 0.0.1
+defaultContentType: application/cloudevents+json; charset=UTF-8
+channels:
+
+  payments:
+    description: The topic on which payments may be consumed.
+    publish:
+      summary: >-
+        Inform about new payments created.
+      operationId: paymentCreatedStream
+      message:
+        $ref: '#/components/messages/cePaymentCreatedEvent'
+
+  paymentsOrderStarted:
+    description: The topic on which payments may be consumed.
+    subscribe:
+      summary: >-
+        Inform about payment order started
+      operationId: paymentsOrderStartedStream
+      message:
+        $ref: '#/components/messages/cePaymentOrderStartedEvent'
+
+  paymentsOrderApproved:
+    description: The topic on which payments may be consumed.
+    subscribe:
+      summary: >-
+        Inform about payment order approved
+      operationId: paymentsOrderApprovedStream
+      message:
+        $ref: '#/components/messages/cePaymentOrderApprovedEvent'
+
+components:
+
+  messages:
+
+    cePaymentCreatedEvent:
+      name: paymentCreatedEvent
+      title: Payment Created
+      summary: >-
+        Inform about environmental lighting conditions of a particular
+        streetlight.
+      contentType: application/cloudevents+json; charset=UTF-8
+      payload:
+        $ref: '#/components/schemas/paymentCreatedEvent'
+
+    cePaymentOrderStartedEvent:
+      name: paymentStartedEvent
+      title: Payment Orders Started
+      summary: >-
+        Inform about environmental lighting conditions of a particular
+        streetlight.
+      contentType: application/cloudevents+json; charset=UTF-8
+      payload:
+        $ref: '#/components/schemas/paymentOrderStartedEvent'
+
+    cePaymentOrderApprovedEvent:
+      name: paymentOrderApprovedEvent
+      title: Payment Orders Approved
+      summary: >-
+        Inform about environmental lighting conditions of a particular
+        streetlight.
+      contentType: application/cloudevents+json; charset=UTF-8
+      payload:
+        $ref: '#/components/schemas/paymentOrderApprovedEvent'
+
+  schemas:
+
+    paymentCreatedEvent:
+      type: object
+      allOf:
+        - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
+      properties:
+        data:
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-created.json'
+
+    paymentOrderStartedEvent:
+      type: object
+      allOf:
+        - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
+      properties:
+        data:
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-order-started.json'
+
+
+    paymentOrderApprovedEvent:
+      type: object
+      allOf:
+        - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
+      properties:
+        data:
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-order-approved.json'

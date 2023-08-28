@@ -6,7 +6,6 @@ import jakarta.persistence.Embeddable;
 public class CardInfo {
   private String cardInfo;
   private String token;
-
   public CardInfo() {
   }
   public CardInfo(String cardInfo, String token) {
