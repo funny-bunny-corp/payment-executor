@@ -17,10 +17,12 @@
     <quarkus.platform.version>3.2.6.Final</quarkus.platform.version>
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.0.0</surefire-plugin.version>
+    <opentelemetry.version>1.30.0</opentelemetry.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+
       <dependency>
         <groupId>${quarkus.platform.group-id}</groupId>
         <artifactId>${quarkus.platform.artifact-id}</artifactId>
@@ -28,15 +30,19 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-bom</artifactId>
+        <version>${opentelemetry.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
-
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -125,18 +131,14 @@
     </dependency>
 
     <dependency>
-      <groupId>io.opentelemetry</groupId>
-      <artifactId>opentelemetry-extension-trace-propagators</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>io.opentelemetry</groupId>
-      <artifactId>opentelemetry-extension-annotations</artifactId>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-jdbc</artifactId>
     </dependency>
 
   </dependencies>
   <build>
     <plugins>
+
       <plugin>
         <groupId>${quarkus.platform.group-id}</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
@@ -152,6 +154,7 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${compiler-plugin.version}</version>
@@ -161,6 +164,7 @@
           </compilerArgs>
         </configuration>
       </plugin>
+
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire-plugin.version}</version>
@@ -171,6 +175,7 @@
           </systemPropertyVariables>
         </configuration>
       </plugin>
+
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${surefire-plugin.version}</version>
@@ -192,6 +197,30 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.3.0</version>
+        <executions>
+          <execution>
+            <id>copy-otel-javaagent</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifact>io.opentelemetry.javaagent:opentelemetry-javaagent:${opentelemetry.version}</artifact>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+              <stripVersion>true</stripVersion>
+              <outputDirectory>${project.build.directory}/agents/</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
   <profiles>
