@@ -3,7 +3,10 @@ package com.paymentic.domain.transaction;
 import com.paymentic.domain.shared.BuyerInfo;
 import com.paymentic.domain.shared.CardInfo;
 import com.paymentic.domain.shared.PaymentOrderId;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,11 +24,27 @@ public class Transaction {
   @GeneratedValue(generator = "UUID")
   @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
   private UUID id;
+
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name="id",column=@Column(name="payment_order_id"))
+  })
   private PaymentOrderId paymentOrder;
   private String amount;
   private String currency;
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name="document",column=@Column(name="buyer_info_document")),
+      @AttributeOverride(name="name",column=@Column(name="buyer_info_name"))
+  })
   private BuyerInfo buyerInfo;
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name="cardInfo",column=@Column(name="card_info_info")),
+      @AttributeOverride(name="token",column=@Column(name="card_info_token"))
+  })
   private CardInfo cardInfo;
+  @Column(name = "created_at")
   private LocalDateTime createdAt;
   @Enumerated(value = EnumType.STRING)
   private TransactionStatus status;

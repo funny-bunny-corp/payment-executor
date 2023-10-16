@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.util.UUID;
 
-@Entity(name = "event")
+@Entity(name = "payment_executor_event")
 public class Event {
 
   @Id

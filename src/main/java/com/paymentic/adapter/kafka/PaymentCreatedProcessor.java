@@ -2,7 +2,7 @@ package com.paymentic.adapter.kafka;
 
 import com.paymentic.domain.payment.PaymentOrderReceived;
 import com.paymentic.domain.payment.events.PaymentCreatedEvent;
-import com.paymentic.infra.events.EventRepository;
+import com.paymentic.infra.events.repository.EventRepository;
 import io.smallrye.reactive.messaging.annotations.Blocking;
 import io.smallrye.reactive.messaging.ce.IncomingCloudEventMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
