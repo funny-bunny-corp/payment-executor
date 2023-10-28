@@ -1,37 +1,64 @@
 asyncapi: 2.6.0
 id: 'urn:com.paymentic.payments'
 info:
-  title: Payments Executor API CloudEvents API structured
+  title: Payments Executor
   version: 0.0.1
 defaultContentType: application/cloudevents+json; charset=UTF-8
 channels:
 
   payments:
+    bindings:
+      kafka:
+        topic: 'payments'
+        partitions: 3
+        replicas: 3
+        bindingVersion: '0.4.0'
     description: The topic on which payments may be consumed.
     publish:
       summary: >-
-        Inform about new payments created.
-      operationId: paymentCreatedStream
+        This application serves as the ignition point in the digital payment journey, adeptly generating events to commence the payment order flow. Equipped with a user-friendly interface, it allows users or systems to input transaction details and then, with precision, triggers the sequence of events essential for processing the payment. By ensuring a streamlined initiation, the application paves the way for a smooth and error-free transactional experience. At its core, this software embodies the perfect blend of user-centric design and advanced technological orchestration, making the onset of financial transactions seamless and intuitive.
+      operationId: paymentRequested
       message:
         $ref: '#/components/messages/cePaymentCreatedEvent'
 
   paymentsOrderStarted:
-    description: The topic on which payments may be consumed.
+    bindings:
+      kafka:
+        topic: 'payments'
+        partitions: 3
+        replicas: 3
+        bindingVersion: '0.4.0'
+    description: Handles payment orders that got started.
     subscribe:
       summary: >-
-        Inform about payment order started
-      operationId: paymentsOrderStartedStream
+        As soon as a payment order is kick-started, the application is alerted, verifying the commencement and ensuring that the transaction follows its prescribed path. With a focus on real-time monitoring and proactive alert mechanisms, it provides businesses and users a timely insight into the onset of their financial transactions. Crafted for entities that prioritize a smooth and transparent commencement of their payment processes, this application embodies the harmonious blend of intuitive technology with foundational financial practices.
+      operationId: receiveOrderStarted
       message:
-        $ref: '#/components/messages/cePaymentOrderStartedEvent'
+        $ref: '#/components/messages/cePaymentStartedEvent'
+
+  paymentsOrderDeclined:
+    bindings:
+      kafka:
+        topic: 'payments'
+        partitions: 3
+        replicas: 3
+        bindingVersion: '0.4.0'
+    description: Handles payment orders that got declined.
+    subscribe:
+      summary: >-
+        Whenever an order faces a decline, the application swiftly responds, ensuring that all stakeholders are informed and any necessary corrective actions can be initiated. With an emphasis on security and transparency, it provides detailed insights into the reasons for decline, assisting businesses in enhancing their payment success rates. Tailored for organizations seeking efficient financial error handling and improved customer communication, this application exemplifies the synergy between technology and fiscal management.
+      operationId: receiveOrderDeclined
+      message:
+        $ref: '#/components/messages/cePaymentsOrderDeclined'
 
   paymentsOrderApproved:
-    description: The topic on which payments may be consumed.
+    description: Handles payment orders that got approved.
     subscribe:
       summary: >-
-        Inform about payment order approved
-      operationId: paymentsOrderApprovedStream
+        Once an order receives approval, the application is instantly triggered, ensuring timely and secure handling of financial transactions. Integrating robust security measures and real-time monitoring, it ensures that every payment order is handled with the utmost precision and trustworthiness. Designed for businesses that prioritize swift and transparent financial operations, this application stands as a testament to the fusion of technology and finance.
+      operationId: receiveOrderApproved
       message:
-        $ref: '#/components/messages/cePaymentOrderApprovedEvent'
+        $ref: '#/components/messages/cePaymentsOrderApproved'
 
 components:
 
@@ -41,13 +68,11 @@ components:
       name: paymentCreatedEvent
       title: Payment Created
       summary: >-
-        Inform about environmental lighting conditions of a particular
-        streetlight.
+        A Payment Request Creation Message is the starting point in the digital transaction journey. It signifies that a request to initiate a payment has been successfully created, setting the stage for further processing. With vital information like the request ID, creation timestamp, intended recipient, and the stipulated amount, this message acts as an initial assurance to the payer of the impending transaction. By broadcasting this preliminary step, businesses and platforms offer transparency right from the get-go, laying a foundation of trust for the subsequent stages of the payment process. Essentially, this message encapsulates the promise of a smooth, organized, and transparent financial interaction.
       contentType: application/cloudevents+json; charset=UTF-8
       payload:
         $ref: '#/components/schemas/paymentCreatedEvent'
-
-    cePaymentOrderStartedEvent:
+    cePaymentStartedEvent:
       name: paymentStartedEvent
       title: Payment Orders Started
       summary: >-
@@ -57,15 +82,24 @@ components:
       payload:
         $ref: '#/components/schemas/paymentOrderStartedEvent'
 
-    cePaymentOrderApprovedEvent:
-      name: paymentOrderApprovedEvent
-      title: Payment Orders Approved
+    cePaymentsOrderDeclined:
+      name: paymentsOrderDeclined
+      title: Message that contains data when the payment order got declined from PSP
       summary: >-
-        Inform about environmental lighting conditions of a particular
-        streetlight.
+        A Payment Order Decline Message is a crucial communication tool used in the financial and e-commerce sectors. It conveys the unfortunate news that a transaction attempt was unsuccessful. The message typically includes essential details like the order ID, transaction date, merchant information, and the specific reason for the decline. This transparency ensures that customers are well-informed and can take necessary corrective actions, such as updating their payment method or checking their account balance. In essence, this message plays a pivotal role in maintaining trust and clarity between businesses and their customers in the face of transactional hiccups.
       contentType: application/cloudevents+json; charset=UTF-8
       payload:
-        $ref: '#/components/schemas/paymentOrderApprovedEvent'
+        $ref: '#/components/schemas/paymentsOrderDeclined'
+
+
+    cePaymentsOrderApproved:
+      name: paymentsOrderApproved
+      title: Message that contains data when the payment order got approved from PSP
+      summary: >-
+        A Payment Order Approval Message acts as a beacon of confirmation in the financial and e-commerce landscapes. It joyfully informs customers that their transaction attempt has been successful. This message encapsulates key data such as the order ID, transaction date, merchant details, and the total amount approved. By delivering this assurance, businesses foster a sense of trust and positive reinforcement with their clientele, encouraging future transactions. In its essence, this message not only acknowledges successful financial interactions but also strengthens the bond between businesses and their valued customers.
+      contentType: application/cloudevents+json; charset=UTF-8
+      payload:
+        $ref: '#/components/schemas/paymentsOrderApproved'
 
   schemas:
 
@@ -85,11 +119,18 @@ components:
         data:
           $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-order-started.json'
 
-
-    paymentOrderApprovedEvent:
+    paymentsOrderApproved:
       type: object
       allOf:
         - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
       properties:
         data:
           $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-order-approved.json'
+
+    paymentsOrderDeclined:
+      type: object
+      allOf:
+        - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
+      properties:
+        data:
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-order-declined.json'
