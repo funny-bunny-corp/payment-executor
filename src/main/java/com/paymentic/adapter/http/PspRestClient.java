@@ -12,4 +12,6 @@ public interface PspRestClient {
   @POST
   PaymentResult pay(PaymentRequest request);
 
+
+
 }
