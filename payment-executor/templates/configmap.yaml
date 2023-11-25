@@ -5,6 +5,6 @@ metadata:
   labels:
    {{- include "payment-executor.labels" . | nindent 4 }}
 data:
-  metrics_exporter: "otlp"
+  metrics_exporter: "none"
   otel_resource_attributes: "service.name=payment-executor"
   otel_otlp_endpoint: "http://jaeger-collector.observability:4317"

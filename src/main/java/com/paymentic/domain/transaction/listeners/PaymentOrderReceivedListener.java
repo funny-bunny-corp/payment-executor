@@ -13,6 +13,7 @@ import com.paymentic.domain.transaction.repositories.TransactionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.TransactionPhase;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -36,20 +37,24 @@ public class PaymentOrderReceivedListener {
     this.orderStartedTrigger = orderStartedTrigger;
   }
   @Transactional
-  void paymentOrderReceived(@Observes PaymentOrderReceived paymentOrder){
+  void paymentOrderReceived(@Observes(during = TransactionPhase.AFTER_SUCCESS) PaymentOrderReceived paymentOrder){
     LOGGER.info("Payment Order received starting process....");
     var transactionReceived = Transaction.newTransactionReceived(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.checkout()
         .getBuyerInfo(),paymentOrder.checkout().getCardInfo());
     this.transactionRepository.persist(transactionReceived);
+    LOGGER.info("Triggering order started..");
     this.orderStartedTrigger.fire(new PaymentOrderStartedEvent(paymentOrder.id().toString()));
+    LOGGER.info("Order started fired!!!");
+    LOGGER.info("Calling PSP integration...");
     var paymentResult = this.pspRestClient.pay(new PaymentRequest(paymentOrder.amount()));
+    LOGGER.info("PSP executed successfully!!!");
     var transactionProcessed = Transaction.newTransactionProcessed(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.checkout()
         .getBuyerInfo(),paymentOrder.checkout().getCardInfo(),paymentResult.getStatus());
     this.transactionRepository.persist(transactionProcessed);
     var event = new TransactionProcessedEvent(new TransactionId(transactionProcessed.getId()),paymentOrder.seller(),new PaymentOrderId(paymentOrder.id()),new CheckoutId(paymentOrder.checkout().getId()),paymentOrder.amount(),paymentOrder.currency(),
         LocalDateTime.now(),paymentOrder.checkout().getBuyerInfo(),transactionProcessed.getStatus());
     this.transactionTrigger.fire(event);
-    LOGGER.info("Payment Order processed");
+    LOGGER.info("Payment Order processed successfully!!!");
   }
 
 }
