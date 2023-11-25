@@ -13,7 +13,7 @@ public class OrderStarterProcessor {
   public OrderStarterProcessor(@Channel("payment-order-started") Emitter<PaymentOrderStartedEvent> paymentOrderStartedEventEmitter) {
     this.paymentOrderStartedEventEmitter = paymentOrderStartedEventEmitter;
   }
-  public void notify(@Observes(during = TransactionPhase.BEFORE_COMPLETION) PaymentOrderStartedEvent event){
+  public void notify(@Observes(during = TransactionPhase.AFTER_SUCCESS) PaymentOrderStartedEvent event){
     this.paymentOrderStartedEventEmitter.send(event);
   }
 

@@ -13,7 +13,6 @@ import com.paymentic.domain.transaction.repositories.TransactionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.event.TransactionPhase;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -37,7 +36,7 @@ public class PaymentOrderReceivedListener {
     this.orderStartedTrigger = orderStartedTrigger;
   }
   @Transactional
-  void paymentOrderReceived(@Observes(during = TransactionPhase.AFTER_SUCCESS) PaymentOrderReceived paymentOrder){
+  void paymentOrderReceived(@Observes PaymentOrderReceived paymentOrder){
     LOGGER.info("Payment Order received starting process....");
     var transactionReceived = Transaction.newTransactionReceived(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.checkout()
         .getBuyerInfo(),paymentOrder.checkout().getCardInfo());
