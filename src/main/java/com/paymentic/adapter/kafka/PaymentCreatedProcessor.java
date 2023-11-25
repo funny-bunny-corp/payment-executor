@@ -37,8 +37,10 @@ public class PaymentCreatedProcessor {
         LOGGER.info("Receiving payment created event. Start processing....");
         if (Objects.nonNull(paymentCreated.payments())){
           paymentCreated.payments().forEach(paymentOrder -> {
+            LOGGER.info("Triggering internal process");
             this.trigger.fire(new PaymentOrderReceived(paymentOrder.id(),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.status(),
                 LocalDateTime.now(),paymentCreated.checkout(),paymentOrder.sellerInfo()));
+            LOGGER.info("Process triggered!");
           });
         }
         LOGGER.info("Payment created event processed!");

@@ -16,9 +16,11 @@ import jakarta.enterprise.event.Observes;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class PaymentOrderReceivedListener {
+  private static final Logger LOGGER = Logger.getLogger(PaymentOrderReceivedListener.class);
   private final TransactionRepository transactionRepository;
   private final PspRestClient pspRestClient;
   private final Event<TransactionProcessedEvent> transactionTrigger;
@@ -35,6 +37,7 @@ public class PaymentOrderReceivedListener {
   }
   @Transactional
   void paymentOrderReceived(@Observes PaymentOrderReceived paymentOrder){
+    LOGGER.info("Payment Order received starting process....");
     var transactionReceived = Transaction.newTransactionReceived(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.checkout()
         .getBuyerInfo(),paymentOrder.checkout().getCardInfo());
     this.transactionRepository.persist(transactionReceived);
@@ -46,6 +49,7 @@ public class PaymentOrderReceivedListener {
     var event = new TransactionProcessedEvent(new TransactionId(transactionProcessed.getId()),paymentOrder.seller(),new PaymentOrderId(paymentOrder.id()),new CheckoutId(paymentOrder.checkout().getId()),paymentOrder.amount(),paymentOrder.currency(),
         LocalDateTime.now(),paymentOrder.checkout().getBuyerInfo(),transactionProcessed.getStatus());
     this.transactionTrigger.fire(event);
+    LOGGER.info("Payment Order processed");
   }
 
 }
