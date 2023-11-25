@@ -7,4 +7,4 @@ metadata:
 data:
   metrics_exporter: "otlp"
   otel_resource_attributes: "service.name=payment-executor"
-  otel_otlp_endpoint: "http://jaeger-collector.observability:4318"
+  otel_otlp_endpoint: "http://jaeger-collector.observability:4317"
