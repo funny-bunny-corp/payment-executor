@@ -18,7 +18,7 @@ public class TransactionResultProcessor {
     this.transactionFailedEmitter = transactionProcessedEmitter;
     this.transactionApprovedEmitter = transactionApprovedEmitter;
   }
-  public void notify(@Observes(during = TransactionPhase.AFTER_COMPLETION) TransactionProcessedEvent transactionProcessedEvent){
+  public void notify(@Observes(during = TransactionPhase.AFTER_SUCCESS  ) TransactionProcessedEvent transactionProcessedEvent){
     if (TransactionStatus.APPROVED.equals(transactionProcessedEvent.status())){
       this.transactionApprovedEmitter.send(transactionProcessedEvent);
     }else {
