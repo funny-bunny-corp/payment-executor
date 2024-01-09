@@ -70,11 +70,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "payment-executor.fullname" . }}
                   key: username
-            - name: JAAS_CONFIG
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "payment-executor.fullname" . }}
-                  key: kafka_jaas
             - name: OTEL_RESOURCE_ATTRIBUTES
               valueFrom:
                 configMapKeyRef:
@@ -90,6 +85,12 @@ spec:
                 configMapKeyRef:
                   key: otel_otlp_endpoint
                   name:  {{ include "payment-executor.fullname" . }}
+            - name: QUARKUS_PROFILE
+              valueFrom:
+                configMapKeyRef:
+                  key: profile
+                  name:  {{ include "payment-executor.fullname" . }}
+
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

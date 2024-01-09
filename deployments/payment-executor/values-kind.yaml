@@ -1,0 +1,10 @@
+## database configurations
+db:
+  user: cG9zdGdyZXM=
+  pass: cG9zdGdyZXM=
+  url: amRiYzpwb3N0Z3Jlc3FsOi8vcG9zdGdyZXNxbC5kYXRhYmFzZTo1NDMyL3Bvc3RncmVz
+
+otel:
+  endpoint: grafana-k8s-monitoring-grafana-agent.default.svc.cluster.local:4317
+
+profile: kind

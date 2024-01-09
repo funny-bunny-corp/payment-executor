@@ -4,6 +4,5 @@ db:
   pass: cG9zdGdyZXM=
   url: amRiYzpwb3N0Z3Jlc3FsOi8vbG9jYWxob3N0OjU0MzIvcG9zdGdyZXM=
 
-## Kafka Jaas
-kafka:
-  jaas: add_here
+otel:
+  endpoint: grafana-k8s-monitoring-grafana-agent.default.svc.cluster.local:4317

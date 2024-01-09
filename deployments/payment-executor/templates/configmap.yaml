@@ -7,4 +7,5 @@ metadata:
 data:
   metrics_exporter: "none"
   otel_resource_attributes: "service.name=payment-executor"
-  otel_otlp_endpoint: "http://jaeger-collector.observability:4317"
+  otel_otlp_endpoint: "{{ .Values.otel.endpoint }}"
+  profile: "{{ .Values.profile }}"
