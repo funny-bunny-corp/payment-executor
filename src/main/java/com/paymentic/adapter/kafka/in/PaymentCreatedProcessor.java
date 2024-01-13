@@ -1,4 +1,4 @@
-package com.paymentic.adapter.kafka;
+package com.paymentic.adapter.kafka.in;
 
 import com.paymentic.domain.payment.PaymentOrderReceived;
 import com.paymentic.domain.payment.events.PaymentCreatedEvent;
