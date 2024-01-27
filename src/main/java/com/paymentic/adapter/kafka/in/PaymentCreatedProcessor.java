@@ -17,7 +17,7 @@ import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class PaymentCreatedProcessor {
-  private static final String PAYMENT_ORDER_CREATED_EVENT_TYPE = "paymentic.payments.gateway.v1.payment.created";
+  private static final String PAYMENT_ORDER_CREATED_EVENT_TYPE = "paymentic.io.payment-processing.v1.payment.created";
   private static final Logger LOGGER = Logger.getLogger(PaymentCreatedProcessor.class);
   private final Event<PaymentOrderReceived> trigger;
   private final EventRepository eventRepository;
@@ -34,16 +34,17 @@ public class PaymentCreatedProcessor {
     var handle = eventRepository.shouldHandle(new com.paymentic.infra.events.Event(UUID.fromString(event.getId())));
     if (handle){
       if (PAYMENT_ORDER_CREATED_EVENT_TYPE.equals(event.getType())){
-        LOGGER.info("Receiving payment created event. Start processing....");
+        LOGGER.info(String.format("Receiving payment created event. Checkout-Id %s Event-Id %s. Start processing....",paymentCreated.checkout().getId().toString(),event.getId()));
         if (Objects.nonNull(paymentCreated.payments())){
           paymentCreated.payments().forEach(paymentOrder -> {
             LOGGER.info("Triggering internal process");
-            this.trigger.fire(new PaymentOrderReceived(paymentOrder.id(),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.status(),
+            LOGGER.info(String.format("Triggering payment order created. Payment-Order-Id %s .  Start processing....",paymentCreated.checkout().getId().toString()));
+            this.trigger.fire(new PaymentOrderReceived(UUID.fromString(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.status(),
                 LocalDateTime.now(),paymentCreated.checkout(),paymentOrder.sellerInfo()));
-            LOGGER.info("Process triggered!");
+            LOGGER.info(String.format("Payment order triggered. Payment-Order-Id %s . ",paymentCreated.checkout().getId().toString()));
           });
         }
-        LOGGER.info("Payment created event processed!");
+        LOGGER.info(String.format("Payment created event processed. Checkout-Id %s Event-Id %s. Start processing....",paymentCreated.checkout().getId().toString(),event.getId()));
       }
     }
     return message.ack();

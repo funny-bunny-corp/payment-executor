@@ -50,11 +50,12 @@ public class Transaction {
   private TransactionStatus status;
   @Enumerated(value = EnumType.STRING)
   private TransactionSituation situation;
-
+  @Enumerated(value = EnumType.STRING)
+  private TransactionType type;
   public Transaction(){}
   public Transaction(PaymentOrderId paymentOrder, String amount, String currency,
       BuyerInfo buyerInfo,
-      CardInfo cardInfo, LocalDateTime createdAt, TransactionStatus status,TransactionSituation situation) {
+      CardInfo cardInfo, LocalDateTime createdAt, TransactionStatus status,TransactionSituation situation,TransactionType type){
     this.paymentOrder = paymentOrder;
     this.amount = amount;
     this.currency = currency;
@@ -63,17 +64,18 @@ public class Transaction {
     this.createdAt = createdAt;
     this.status = status;
     this.situation = situation;
+    this.type = type;
   }
   public static Transaction newTransactionReceived(PaymentOrderId paymentOrder, String amount, String currency,
-      BuyerInfo buyerInfo, CardInfo cardInfo){
-    return new Transaction(paymentOrder,amount,currency,buyerInfo,cardInfo,LocalDateTime.now(),TransactionStatus.UNDEFINED,TransactionSituation.RECEIVED);
+      BuyerInfo buyerInfo, CardInfo cardInfo,TransactionType type){
+    return new Transaction(paymentOrder,amount,currency,buyerInfo,cardInfo,LocalDateTime.now(),TransactionStatus.UNDEFINED,TransactionSituation.RECEIVED,type);
   }
 
   public static Transaction newTransactionProcessed(PaymentOrderId paymentOrder, String amount, String currency,
-      BuyerInfo buyerInfo, CardInfo cardInfo,String result){
-    return new Transaction(paymentOrder,amount,currency,buyerInfo,cardInfo,LocalDateTime.now(),TransactionStatus.valueOf(result.toUpperCase()),TransactionSituation.PROCESSED);
+      BuyerInfo buyerInfo, CardInfo cardInfo,String result,TransactionType type){
+    return new Transaction(paymentOrder,amount,currency,buyerInfo,cardInfo,LocalDateTime.now(),TransactionStatus.valueOf(result.toUpperCase()),
+        TransactionSituation.PROCESSED,type);
   }
-
   public UUID getId() {
     return id;
   }
@@ -98,5 +100,10 @@ public class Transaction {
   public TransactionStatus getStatus() {
     return status;
   }
-
+  public TransactionSituation getSituation() {
+    return situation;
+  }
+  public TransactionType getType() {
+    return type;
+  }
 }

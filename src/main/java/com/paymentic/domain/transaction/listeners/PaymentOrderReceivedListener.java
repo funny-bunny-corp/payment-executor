@@ -2,12 +2,13 @@ package com.paymentic.domain.transaction.listeners;
 
 import com.paymentic.adapter.http.PspRestClient;
 import com.paymentic.domain.payment.PaymentOrderReceived;
-import com.paymentic.domain.payment.events.PaymentOrderStartedEvent;
+import com.paymentic.domain.payment.events.RefundOrderStarted;
 import com.paymentic.domain.psp.PaymentRequest;
 import com.paymentic.domain.shared.CheckoutId;
 import com.paymentic.domain.shared.PaymentOrderId;
 import com.paymentic.domain.transaction.Transaction;
 import com.paymentic.domain.transaction.TransactionId;
+import com.paymentic.domain.transaction.TransactionType;
 import com.paymentic.domain.transaction.events.TransactionProcessedEvent;
 import com.paymentic.domain.transaction.repositories.TransactionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,12 +25,12 @@ public class PaymentOrderReceivedListener {
   private final TransactionRepository transactionRepository;
   private final PspRestClient pspRestClient;
   private final Event<TransactionProcessedEvent> transactionTrigger;
-  private final Event<PaymentOrderStartedEvent> orderStartedTrigger;
+  private final Event<RefundOrderStarted> orderStartedTrigger;
 
   public PaymentOrderReceivedListener(TransactionRepository transactionRepository,
       @RestClient PspRestClient pspRestClient,
       Event<TransactionProcessedEvent> trigger,
-      Event<PaymentOrderStartedEvent> orderStartedTrigger) {
+      Event<RefundOrderStarted> orderStartedTrigger) {
     this.transactionRepository = transactionRepository;
     this.pspRestClient = pspRestClient;
     this.transactionTrigger = trigger;
@@ -39,18 +40,18 @@ public class PaymentOrderReceivedListener {
   void paymentOrderReceived(@Observes PaymentOrderReceived paymentOrder){
     LOGGER.info("Payment Order received starting process....");
     var transactionReceived = Transaction.newTransactionReceived(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.checkout()
-        .getBuyerInfo(),paymentOrder.checkout().getCardInfo());
+        .getBuyerInfo(),paymentOrder.checkout().getCardInfo(), TransactionType.PAYMENT);
     this.transactionRepository.persist(transactionReceived);
     LOGGER.info("Triggering order started..");
-    this.orderStartedTrigger.fire(new PaymentOrderStartedEvent(paymentOrder.id().toString()));
+    this.orderStartedTrigger.fire(new RefundOrderStarted(paymentOrder.id().toString()));
     LOGGER.info("Order started fired!!!");
     LOGGER.info("Calling PSP integration...");
     var paymentResult = this.pspRestClient.pay(new PaymentRequest(paymentOrder.amount()));
     LOGGER.info("PSP executed successfully!!!");
     var transactionProcessed = Transaction.newTransactionProcessed(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.checkout()
-        .getBuyerInfo(),paymentOrder.checkout().getCardInfo(),paymentResult.getStatus());
+        .getBuyerInfo(),paymentOrder.checkout().getCardInfo(),paymentResult.getStatus(),TransactionType.PAYMENT);
     this.transactionRepository.persist(transactionProcessed);
-    var event = new TransactionProcessedEvent(new TransactionId(transactionProcessed.getId()),paymentOrder.seller(),new PaymentOrderId(paymentOrder.id()),new CheckoutId(paymentOrder.checkout().getId()),paymentOrder.amount(),paymentOrder.currency(),
+    var event = TransactionProcessedEvent.ofCheckout(new TransactionId(transactionProcessed.getId()),paymentOrder.seller(),new PaymentOrderId(paymentOrder.id()),new CheckoutId(paymentOrder.checkout().getId()),paymentOrder.amount(),paymentOrder.currency(),
         LocalDateTime.now(),paymentOrder.checkout().getBuyerInfo(),transactionProcessed.getStatus());
     this.transactionTrigger.fire(event);
     LOGGER.info("Payment Order processed successfully!!!");

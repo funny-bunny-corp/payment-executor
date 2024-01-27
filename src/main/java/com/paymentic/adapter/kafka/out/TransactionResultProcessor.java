@@ -19,24 +19,23 @@ public class TransactionResultProcessor {
   private static final Logger LOGGER = Logger.getLogger(TransactionResultProcessor.class);
   private final Emitter<TransactionProcessedEvent> transactionFailedEmitter;
   private final Emitter<TransactionProcessedEvent> transactionApprovedEmitter;
-
   public TransactionResultProcessor( @Channel("transaction-failed") Emitter<TransactionProcessedEvent> transactionProcessedEmitter,
       @Channel("transaction-approved") Emitter<TransactionProcessedEvent> transactionApprovedEmitter) {
     this.transactionFailedEmitter = transactionProcessedEmitter;
     this.transactionApprovedEmitter = transactionApprovedEmitter;
   }
   public void notify(@Observes(during = TransactionPhase.AFTER_SUCCESS  ) TransactionProcessedEvent transactionProcessedEvent){
-    LOGGER.info(String.format("Payment order id processing %s",transactionProcessedEvent.payment().getId().toString()));
+    LOGGER.info(String.format("Transaction type %s processing %s",transactionProcessedEvent.type(),transactionProcessedEvent.id()));
     var metadata = OutgoingCloudEventMetadata.builder()
         .withExtensions(new ExtensionsBuilder().audience(Audience.EXTERNAL_BOUNDED_CONTEXT).eventContext(
             EventContext.DOMAIN).build())
         .build();
-    if (TransactionStatus.APPROVED.equals(transactionProcessedEvent.status())){
+    if (TransactionStatus.APPROVED.equals(transactionProcessedEvent.getStatus())){
       this.transactionApprovedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
     }else {
       this.transactionFailedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
     }
-    LOGGER.info(String.format("Payment order id processed %s",transactionProcessedEvent.payment().getId().toString()));
+    LOGGER.info(String.format("Transaction type %s id processed %s",transactionProcessedEvent.type(),transactionProcessedEvent.id()));
   }
 
 }

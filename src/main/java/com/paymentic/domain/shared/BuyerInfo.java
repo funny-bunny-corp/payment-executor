@@ -6,7 +6,6 @@ import jakarta.persistence.Embeddable;
 public class BuyerInfo {
   private String document;
   private String name;
-
   public BuyerInfo() {
   }
   public BuyerInfo(String document, String name) {

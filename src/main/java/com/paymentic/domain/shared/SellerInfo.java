@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class SellerInfo {
   private String sellerId;
-
   public SellerInfo() {
   }
   public SellerInfo(String sellerId) {
