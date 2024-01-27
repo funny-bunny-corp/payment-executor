@@ -17,12 +17,19 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 public class TransactionResultProcessor {
   private static final Logger LOGGER = Logger.getLogger(TransactionResultProcessor.class);
-  private final Emitter<TransactionProcessedEvent> transactionFailedEmitter;
-  private final Emitter<TransactionProcessedEvent> transactionApprovedEmitter;
-  public TransactionResultProcessor( @Channel("transaction-failed") Emitter<TransactionProcessedEvent> transactionProcessedEmitter,
-      @Channel("transaction-approved") Emitter<TransactionProcessedEvent> transactionApprovedEmitter) {
-    this.transactionFailedEmitter = transactionProcessedEmitter;
-    this.transactionApprovedEmitter = transactionApprovedEmitter;
+  private final Emitter<TransactionProcessedEvent> paymentOrderFailedEmitter;
+  private final Emitter<TransactionProcessedEvent> paymentOrderApprovedEmitter;
+  private final Emitter<TransactionProcessedEvent> refundFailedEmitter;
+  private final Emitter<TransactionProcessedEvent> refundApprovedEmitter;
+  public TransactionResultProcessor(
+      @Channel("payment-order-failed") Emitter<TransactionProcessedEvent> paymentOrderFailedEmitter,
+      @Channel("payment-order-approved") Emitter<TransactionProcessedEvent> paymentOrderApprovedEmitter,
+      @Channel("refund-failed") Emitter<TransactionProcessedEvent> refundFailedEmitter,
+      @Channel("refund-approved") Emitter<TransactionProcessedEvent> refundApprovedEmitter) {
+    this.paymentOrderFailedEmitter = paymentOrderFailedEmitter;
+    this.paymentOrderApprovedEmitter = paymentOrderApprovedEmitter;
+    this.refundApprovedEmitter = refundApprovedEmitter;
+    this.refundFailedEmitter = refundFailedEmitter;
   }
   public void notify(@Observes(during = TransactionPhase.AFTER_SUCCESS  ) TransactionProcessedEvent transactionProcessedEvent){
     LOGGER.info(String.format("Transaction type %s processing %s",transactionProcessedEvent.type(),transactionProcessedEvent.id()));
@@ -31,9 +38,9 @@ public class TransactionResultProcessor {
             EventContext.DOMAIN).build())
         .build();
     if (TransactionStatus.APPROVED.equals(transactionProcessedEvent.getStatus())){
-      this.transactionApprovedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
+      this.paymentOrderApprovedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
     }else {
-      this.transactionFailedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
+      this.paymentOrderFailedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
     }
     LOGGER.info(String.format("Transaction type %s id processed %s",transactionProcessedEvent.type(),transactionProcessedEvent.id()));
   }
