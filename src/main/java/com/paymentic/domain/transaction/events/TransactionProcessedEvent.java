@@ -81,6 +81,12 @@ public class TransactionProcessedEvent {
   public RefundId getRefundId() {
     return refundId;
   }
+  public boolean isRefund(){
+    return Objects.nonNull(this.refundId);
+  }
+  public boolean isCheckout(){
+    return Objects.nonNull(this.checkoutId);
+  }
   public String type(){
     if (Objects.nonNull(this.refundId)){
       return TransactionType.REFUND.name();

@@ -6,7 +6,7 @@ info:
 defaultContentType: application/cloudevents+json; charset=UTF-8
 channels:
 
-  payments:
+  paymentCreated:
     bindings:
       kafka:
         topic: 'payments'
@@ -109,7 +109,7 @@ components:
         - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
       properties:
         data:
-          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-created.json'
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payment-processing/payments-gateway.v1.payment-created.json'
 
     paymentOrderStartedEvent:
       type: object
@@ -117,7 +117,7 @@ components:
         - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
       properties:
         data:
-          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-order-started.json'
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payment-processing/payments-gateway.v1.payment-order-started.json'
 
     paymentsOrderApproved:
       type: object
@@ -125,7 +125,7 @@ components:
         - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
       properties:
         data:
-          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-order-approved.json'
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payment-processing/payments-gateway.v1.transaction-approved.json'
 
     paymentsOrderDeclined:
       type: object
@@ -133,4 +133,28 @@ components:
         - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
       properties:
         data:
-          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-order-declined.json'
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payment-processing/payments-gateway.v1.transaction-declined.json'
+
+    refundApproved:
+      type: object
+      allOf:
+        - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
+      properties:
+        data:
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payment-processing/payments-gateway.v1.transaction-approved.json'
+
+    refundDeclined:
+      type: object
+      allOf:
+        - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
+      properties:
+        data:
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payment-processing/payments-gateway.v1.transaction-declined.json'
+
+    refundCreated:
+      type: object
+      allOf:
+        - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
+      properties:
+        data:
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payment-processing/payments-gateway.v1.refund-created.json'

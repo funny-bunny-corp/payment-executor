@@ -37,10 +37,20 @@ public class TransactionResultProcessor {
         .withExtensions(new ExtensionsBuilder().audience(Audience.EXTERNAL_BOUNDED_CONTEXT).eventContext(
             EventContext.DOMAIN).build())
         .build();
-    if (TransactionStatus.APPROVED.equals(transactionProcessedEvent.getStatus())){
-      this.paymentOrderApprovedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
-    }else {
-      this.paymentOrderFailedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
+    if (transactionProcessedEvent.isCheckout()){
+      if (TransactionStatus.APPROVED.equals(transactionProcessedEvent.getStatus())){
+        this.paymentOrderApprovedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
+      }else {
+        this.paymentOrderFailedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
+      }
+    } else if (transactionProcessedEvent.isRefund()){
+      if (TransactionStatus.APPROVED.equals(transactionProcessedEvent.getStatus())){
+        this.refundApprovedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
+      }else {
+        this.refundFailedEmitter.send(Message.of(transactionProcessedEvent).addMetadata(metadata));
+      }
+    } else{
+      throw new IllegalArgumentException("Transaction type not supported");
     }
     LOGGER.info(String.format("Transaction type %s id processed %s",transactionProcessedEvent.type(),transactionProcessedEvent.id()));
   }
