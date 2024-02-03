@@ -16,6 +16,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.apache.kafka.common.protocol.types.Field.Str;
@@ -42,7 +43,8 @@ public class RefundReceivedListener {
         TransactionType.REFUND);
     this.transactionRepository.persist(transactionReceived);
     LOGGER.info(String.format("Triggering refund %s started..",refundReceived.refund().id()));
-    this.refundStartedTrigger.fire(new RefundOrderStarted(refundReceived.refund().id().toString()));
+    this.refundStartedTrigger.fire(new RefundOrderStarted(refundReceived.refund().id().toString(),refundReceived.refund().amount(),refundReceived.refund().currency(),refundReceived.paymentOrder().sellerInfo(),
+            LocalDate.now().toString()));
     LOGGER.info(String.format("Refund started %s fired!!!", refundReceived.refund().id()));
     var transactionProcessed = Transaction.newTransactionProcessed(new PaymentOrderId(UUID.fromString(refundReceived.paymentOrder().id())),refundReceived.refund().amount(),
         refundReceived.refund().currency(),refundReceived.refund().buyerInfo(),refundReceived.refund().cardInfo(),

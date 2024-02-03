@@ -2,6 +2,7 @@ package com.paymentic.domain.transaction.listeners;
 
 import com.paymentic.adapter.http.PspRestClient;
 import com.paymentic.domain.payment.PaymentOrderReceived;
+import com.paymentic.domain.payment.events.PaymentOrderStartedEvent;
 import com.paymentic.domain.payment.events.RefundOrderStarted;
 import com.paymentic.domain.psp.PaymentRequest;
 import com.paymentic.domain.shared.CheckoutId;
@@ -25,12 +26,12 @@ public class PaymentOrderReceivedListener {
   private final TransactionRepository transactionRepository;
   private final PspRestClient pspRestClient;
   private final Event<TransactionProcessedEvent> transactionTrigger;
-  private final Event<RefundOrderStarted> orderStartedTrigger;
+  private final Event<PaymentOrderStartedEvent> orderStartedTrigger;
 
   public PaymentOrderReceivedListener(TransactionRepository transactionRepository,
       @RestClient PspRestClient pspRestClient,
       Event<TransactionProcessedEvent> trigger,
-      Event<RefundOrderStarted> orderStartedTrigger) {
+      Event<PaymentOrderStartedEvent> orderStartedTrigger) {
     this.transactionRepository = transactionRepository;
     this.pspRestClient = pspRestClient;
     this.transactionTrigger = trigger;
@@ -43,7 +44,7 @@ public class PaymentOrderReceivedListener {
         .getBuyerInfo(),paymentOrder.checkout().getCardInfo(), TransactionType.PAYMENT);
     this.transactionRepository.persist(transactionReceived);
     LOGGER.info("Triggering order started..");
-    this.orderStartedTrigger.fire(new RefundOrderStarted(paymentOrder.id().toString()));
+    this.orderStartedTrigger.fire(new PaymentOrderStartedEvent(paymentOrder.id().toString(),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.seller(),paymentOrder.at().toLocalDate().toString()));
     LOGGER.info("Order started fired!!!");
     LOGGER.info("Calling PSP integration...");
     var paymentResult = this.pspRestClient.pay(new PaymentRequest(paymentOrder.amount()));
