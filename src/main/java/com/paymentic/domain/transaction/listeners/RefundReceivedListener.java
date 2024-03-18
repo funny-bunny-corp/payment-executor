@@ -43,14 +43,15 @@ public class RefundReceivedListener {
         TransactionType.REFUND);
     this.transactionRepository.persist(transactionReceived);
     LOGGER.info(String.format("Triggering refund %s started..",refundReceived.refund().id()));
-    this.refundStartedTrigger.fire(new RefundOrderStarted(refundReceived.refund().id().toString(),refundReceived.refund().amount(),refundReceived.refund().currency(),refundReceived.paymentOrder().sellerInfo(),
-            LocalDate.now().toString()));
+    this.refundStartedTrigger.fire(new RefundOrderStarted(refundReceived.refund().id().toString(),refundReceived.refund().amount(),refundReceived.refund().currency(),refundReceived.refund()
+        .sellerInfo(), LocalDate.now().toString()));
     LOGGER.info(String.format("Refund started %s fired!!!", refundReceived.refund().id()));
     var transactionProcessed = Transaction.newTransactionProcessed(new PaymentOrderId(UUID.fromString(refundReceived.paymentOrder().id())),refundReceived.refund().amount(),
         refundReceived.refund().currency(),refundReceived.refund().buyerInfo(),refundReceived.refund().cardInfo(),
         TransactionStatus.APPROVED.name() ,TransactionType.REFUND);
     this.transactionRepository.persist(transactionProcessed);
-    var event = TransactionProcessedEvent.ofRefund(new TransactionId(transactionProcessed.getId()),refundReceived.paymentOrder().sellerInfo(),new PaymentOrderId(UUID.fromString(refundReceived.paymentOrder().id())),new RefundId(refundReceived.refund().id()),refundReceived.refund().amount(),refundReceived.refund().currency(),
+    var event = TransactionProcessedEvent.ofRefund(new TransactionId(transactionProcessed.getId()),refundReceived.refund()
+            .sellerInfo(), new PaymentOrderId(UUID.fromString(refundReceived.paymentOrder().id())),new RefundId(refundReceived.refund().id()),refundReceived.refund().amount(),refundReceived.refund().currency(),
         LocalDateTime.now(),refundReceived.refund().buyerInfo(),transactionProcessed.getStatus());
     this.transactionTrigger.fire(event);
     LOGGER.info(String.format("Refund %s processed successfully!!!",refundReceived.refund().id()));

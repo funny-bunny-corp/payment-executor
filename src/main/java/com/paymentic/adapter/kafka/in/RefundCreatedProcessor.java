@@ -20,7 +20,7 @@ import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class RefundCreatedProcessor {
-  private static final String REFUND_CREATED_EVENT_TYPE = "paymentic.io.payment-processing.v1.refund.created";
+  private static final String REFUND_CREATED_EVENT_TYPE = "funny-bunny.xyz.payment-processing.v1.refund.created";
   private static final Logger LOGGER = Logger.getLogger(RefundCreatedProcessor.class);
   private final Event<RefundReceived> trigger;
   private final EventRepository eventRepository;
@@ -38,7 +38,7 @@ public class RefundCreatedProcessor {
     if (handle){
       if (REFUND_CREATED_EVENT_TYPE.equals(event.getType())){
         LOGGER.info(String.format("Receiving refund created event. Refund-Id %s Event-Id %s. Start processing....",refundCreatedEvent.refund().id(),event.getId()));
-        var refund = new Refund(refundCreatedEvent.refund().id(), refundCreatedEvent.refund().amount(),refundCreatedEvent.refund().currency(),refundCreatedEvent.refund().cardInfo(),refundCreatedEvent.refund().buyerInfo());
+        var refund = new Refund(refundCreatedEvent.refund().id(), refundCreatedEvent.refund().amount(),refundCreatedEvent.refund().currency(),refundCreatedEvent.refund().cardInfo(),refundCreatedEvent.refund().buyerInfo(),refundCreatedEvent.refund().sellerInfo());
         this.trigger.fire(new RefundReceived(refund,refundCreatedEvent.payment()));
         LOGGER.info(String.format("Refund created event processed. Refund-Id %s Event-Id %s. Start processing....",refundCreatedEvent.refund().id(),event.getId()));
       }

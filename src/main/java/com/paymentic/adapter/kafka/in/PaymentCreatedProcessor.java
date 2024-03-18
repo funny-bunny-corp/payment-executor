@@ -8,7 +8,6 @@ import io.smallrye.reactive.messaging.ce.IncomingCloudEventMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletionStage;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
@@ -17,7 +16,7 @@ import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class PaymentCreatedProcessor {
-  private static final String PAYMENT_ORDER_CREATED_EVENT_TYPE = "paymentic.io.payment-processing.v1.payment.created";
+  private static final String PAYMENT_ORDER_CREATED_EVENT_TYPE = "funny-bunny.xyz.payment-processing.v1.payment.created";
   private static final Logger LOGGER = Logger.getLogger(PaymentCreatedProcessor.class);
   private final Event<PaymentOrderReceived> trigger;
   private final EventRepository eventRepository;
@@ -34,17 +33,11 @@ public class PaymentCreatedProcessor {
     var handle = eventRepository.shouldHandle(new com.paymentic.infra.events.Event(UUID.fromString(event.getId())));
     if (handle){
       if (PAYMENT_ORDER_CREATED_EVENT_TYPE.equals(event.getType())){
-        LOGGER.info(String.format("Receiving payment created event. Checkout-Id %s Event-Id %s. Start processing....",paymentCreated.checkout().getId().toString(),event.getId()));
-        if (Objects.nonNull(paymentCreated.payments())){
-          paymentCreated.payments().forEach(paymentOrder -> {
-            LOGGER.info("Triggering internal process");
-            LOGGER.info(String.format("Triggering payment order created. Payment-Order-Id %s .  Start processing....",paymentCreated.checkout().getId().toString()));
-            this.trigger.fire(new PaymentOrderReceived(UUID.fromString(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.status(),
-                LocalDateTime.now(),paymentCreated.checkout(),paymentOrder.sellerInfo()));
-            LOGGER.info(String.format("Payment order triggered. Payment-Order-Id %s . ",paymentCreated.checkout().getId().toString()));
-          });
-        }
-        LOGGER.info(String.format("Payment created event processed. Checkout-Id %s Event-Id %s. Start processing....",paymentCreated.checkout().getId().toString(),event.getId()));
+        LOGGER.info(String.format("Receiving payment created event. Checkout-Id %s Event-Id %s. Start processing....",paymentCreated.transaction().order().getId().toString(),event.getId()));
+        var payment = new PaymentOrderReceived(UUID.fromString(paymentCreated.transaction().payment().id()),paymentCreated.transaction().payment().amount(),paymentCreated.transaction().payment().currency(),
+            paymentCreated.transaction().payment().status(), LocalDateTime.now(),paymentCreated.transaction().order(),paymentCreated.transaction().participants().seller(),paymentCreated.transaction().participants().buyer());
+        this.trigger.fire(payment);
+        LOGGER.info(String.format("Payment created event processed. Checkout-Id %s Event-Id %s. Start processing....",paymentCreated.transaction().order().getId().toString(),event.getId()));
       }
     }
     return message.ack();

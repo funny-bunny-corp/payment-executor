@@ -1,7 +1,5 @@
 package com.paymentic.domain.payment.events;
 
-import com.paymentic.domain.checkout.Checkout;
-import com.paymentic.domain.payment.PaymentOrder;
-import java.util.List;
+import com.paymentic.domain.payment.PaymentTransaction;
 
-public record PaymentCreatedEvent(Checkout checkout, List<PaymentOrder> payments) {}
+public record PaymentCreatedEvent(String status,RiskLevel level, PaymentTransaction transaction) {}
