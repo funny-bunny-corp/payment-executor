@@ -3,7 +3,6 @@ package com.paymentic.domain.transaction.listeners;
 import com.paymentic.adapter.http.PspRestClient;
 import com.paymentic.domain.payment.PaymentOrderReceived;
 import com.paymentic.domain.payment.events.PaymentOrderStartedEvent;
-import com.paymentic.domain.payment.events.RefundOrderStarted;
 import com.paymentic.domain.psp.PaymentRequest;
 import com.paymentic.domain.shared.CheckoutId;
 import com.paymentic.domain.shared.PaymentOrderId;
@@ -40,7 +39,7 @@ public class PaymentOrderReceivedListener {
   @Transactional
   void paymentOrderReceived(@Observes PaymentOrderReceived paymentOrder){
     LOGGER.info("Payment Order received starting process....");
-    var transactionReceived = Transaction.newTransactionReceived(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.buyer(),paymentOrder.checkout().getCardInfo(), TransactionType.PAYMENT);
+    var transactionReceived = Transaction.newTransactionReceived(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.buyer(),paymentOrder.checkout().getPaymentType(), TransactionType.PAYMENT);
     this.transactionRepository.persist(transactionReceived);
     LOGGER.info("Triggering order started..");
     this.orderStartedTrigger.fire(new PaymentOrderStartedEvent(paymentOrder.id().toString(),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.seller(),paymentOrder.at().toLocalDate().toString()));
@@ -48,7 +47,7 @@ public class PaymentOrderReceivedListener {
     LOGGER.info("Calling PSP integration...");
     var paymentResult = this.pspRestClient.pay(new PaymentRequest(paymentOrder.amount()));
     LOGGER.info("PSP executed successfully!!!");
-    var transactionProcessed = Transaction.newTransactionProcessed(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.buyer(),paymentOrder.checkout().getCardInfo(),paymentResult.getStatus(),TransactionType.PAYMENT);
+    var transactionProcessed = Transaction.newTransactionProcessed(new PaymentOrderId(paymentOrder.id()),paymentOrder.amount(),paymentOrder.currency(),paymentOrder.buyer(),paymentOrder.checkout().getPaymentType(),paymentResult.getStatus(),TransactionType.PAYMENT);
     this.transactionRepository.persist(transactionProcessed);
     var event = TransactionProcessedEvent.ofCheckout(new TransactionId(transactionProcessed.getId()),paymentOrder.seller(),new PaymentOrderId(paymentOrder.id()),new CheckoutId(paymentOrder.checkout().getId()),paymentOrder.amount(),paymentOrder.currency(),
         LocalDateTime.now(),paymentOrder.buyer(),transactionProcessed.getStatus());
