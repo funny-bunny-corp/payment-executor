@@ -7,7 +7,10 @@ import {
   DashboardStats,
   TransactionFilter,
   PaginatedResponse,
-  ApiError
+  ApiError,
+  TransactionStatus,
+  TransactionSituation,
+  TransactionType
 } from '../types';
 
 class PaymentApiService {
@@ -163,9 +166,9 @@ class MockPaymentApiService extends PaymentApiService {
       buyerInfo: { document: '12345678901', name: 'John Doe' },
       cardInfo: { cardInfo: '**** **** **** 1234', token: 'token123' },
       createdAt: '2024-01-01T10:00:00Z',
-      status: 'APPROVED' as any,
-      situation: 'PROCESSED' as any,
-      type: 'PAYMENT' as any
+      status: TransactionStatus.APPROVED,
+      situation: TransactionSituation.PROCESSED,
+      type: TransactionType.PAYMENT
     },
     {
       id: '2',
@@ -175,9 +178,9 @@ class MockPaymentApiService extends PaymentApiService {
       buyerInfo: { document: '98765432109', name: 'Jane Smith' },
       cardInfo: { cardInfo: '**** **** **** 5678', token: 'token456' },
       createdAt: '2024-01-01T11:00:00Z',
-      status: 'DECLINED' as any,
-      situation: 'PROCESSED' as any,
-      type: 'PAYMENT' as any
+      status: TransactionStatus.DECLINED,
+      situation: TransactionSituation.PROCESSED,
+      type: TransactionType.PAYMENT
     }
   ];
 
