@@ -70,7 +70,7 @@
       },
       {
         "columnName": "transaction_type",
-        "transformFunction": "CASE WHEN jsonPathString(data, '$.refundId') IS NOT NULL THEN 'REFUND' ELSE 'PAYMENT' END"
+        "transformFunction": "CASE WHEN jsonPathString(data, '$.refundId.id') IS NOT NULL THEN 'REFUND' ELSE 'PAYMENT' END"
       },
       {
         "columnName": "transaction_status",
