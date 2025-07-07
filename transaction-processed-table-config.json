@@ -1,0 +1,115 @@
+{
+  "tableName": "transaction_processed_events",
+  "tableType": "REALTIME",
+  "segmentsConfig": {
+    "timeColumnName": "processed_at",
+    "timeType": "MILLISECONDS",
+    "retentionTimeUnit": "DAYS",
+    "retentionTimeValue": "365",
+    "segmentPushType": "APPEND",
+    "segmentAssignmentStrategy": "BalanceNumSegmentAssignmentStrategy"
+  },
+  "tenants": {},
+  "tableIndexConfig": {
+    "loadMode": "MMAP",
+    "invertedIndexColumns": [
+      "transaction_status",
+      "transaction_type",
+      "currency",
+      "seller_id",
+      "buyer_document"
+    ],
+    "rangeIndexColumns": [
+      "processed_at",
+      "amount"
+    ],
+    "sortedColumn": [
+      "processed_at"
+    ],
+    "bloomFilterColumns": [
+      "transaction_id",
+      "payment_order_id",
+      "checkout_id",
+      "refund_id"
+    ]
+  },
+  "ingestionConfig": {
+    "streamIngestionConfig": {
+      "streamConfigMaps": [
+        {
+          "streamType": "kafka",
+          "stream.kafka.consumer.type": "lowlevel",
+          "stream.kafka.topic.name": "payment-processing",
+          "stream.kafka.decoder.class.name": "org.apache.pinot.plugin.stream.kafka.KafkaJSONMessageDecoder",
+          "stream.kafka.consumer.factory.class.name": "org.apache.pinot.plugin.stream.kafka20.KafkaConsumerFactory",
+          "stream.kafka.bootstrap.servers": "localhost:9092",
+          "stream.kafka.consumer.prop.auto.offset.reset": "smallest",
+          "stream.kafka.consumer.prop.group.id": "pinot-transaction-processed-events",
+          "realtime.segment.flush.threshold.rows": "1000000",
+          "realtime.segment.flush.threshold.time": "12h",
+          "realtime.segment.flush.segment.size": "250M"
+        }
+      ]
+    },
+    "transformConfigs": [
+      {
+        "columnName": "transaction_id",
+        "transformFunction": "jsonPathString(data, '$.transaction.id')"
+      },
+      {
+        "columnName": "payment_order_id",
+        "transformFunction": "jsonPathString(data, '$.payment.id')"
+      },
+      {
+        "columnName": "checkout_id",
+        "transformFunction": "jsonPathString(data, '$.checkoutId.id')"
+      },
+      {
+        "columnName": "refund_id",
+        "transformFunction": "jsonPathString(data, '$.refundId.id')"
+      },
+      {
+        "columnName": "transaction_type",
+        "transformFunction": "CASE WHEN jsonPathString(data, '$.refundId') IS NOT NULL THEN 'REFUND' ELSE 'PAYMENT' END"
+      },
+      {
+        "columnName": "transaction_status",
+        "transformFunction": "jsonPathString(data, '$.status')"
+      },
+      {
+        "columnName": "currency",
+        "transformFunction": "jsonPathString(data, '$.currency')"
+      },
+      {
+        "columnName": "seller_id",
+        "transformFunction": "jsonPathString(data, '$.seller.sellerId')"
+      },
+      {
+        "columnName": "buyer_document",
+        "transformFunction": "jsonPathString(data, '$.buyer.document')"
+      },
+      {
+        "columnName": "buyer_name",
+        "transformFunction": "jsonPathString(data, '$.buyer.name')"
+      },
+      {
+        "columnName": "amount",
+        "transformFunction": "jsonPathString(data, '$.amount')"
+      },
+      {
+        "columnName": "processed_at",
+        "transformFunction": "toEpochMillis(jsonPathString(data, '$.at'))"
+      }
+    ],
+    "filterConfig": {
+      "filterFunction": "Groovy({type == 'funny-bunny.xyz.payment-processing.v1.payment-order.approved' || type == 'funny-bunny.xyz.payment-processing.v1.payment-order.declined'}, type)"
+    }
+  },
+  "metadata": {
+    "customConfigs": {
+      "data.product.owner": "payment-processing-team",
+      "data.product.domain": "payments",
+      "data.product.description": "Real-time transaction processing events for payment analytics and monitoring"
+    }
+  }
+}
