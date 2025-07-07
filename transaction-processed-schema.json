@@ -1,0 +1,71 @@
+{
+  "schemaName": "transaction_processed_events",
+  "dimensionFieldSpecs": [
+    {
+      "name": "transaction_id",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "payment_order_id", 
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "checkout_id",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "refund_id",
+      "dataType": "STRING", 
+      "notNull": false
+    },
+    {
+      "name": "transaction_type",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "transaction_status",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "currency",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "seller_id",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "buyer_document",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "buyer_name",
+      "dataType": "STRING",
+      "notNull": true
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "amount",
+      "dataType": "BIG_DECIMAL",
+      "notNull": true
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "processed_at",
+      "dataType": "TIMESTAMP",
+      "format": "1:MILLISECONDS:EPOCH",
+      "granularity": "1:MILLISECONDS",
+      "notNull": true
+    }
+  ]
+}
